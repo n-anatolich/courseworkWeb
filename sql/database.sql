@@ -1,0 +1,133 @@
+-- Таблица пользователей
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    role ENUM('user', 'admin') DEFAULT 'user',
+    is_blocked BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Таблица физических констант
+CREATE TABLE IF NOT EXISTS constants (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    symbol VARCHAR(20) NOT NULL,
+    value DECIMAL(20,10) NOT NULL,
+    unit VARCHAR(50) NOT NULL,
+    description TEXT
+);
+
+-- Таблица категорий задач
+CREATE TABLE IF NOT EXISTS problem_categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    sort_order INT DEFAULT 0
+);
+
+-- Таблица типов задач
+CREATE TABLE IF NOT EXISTS problem_types (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    category_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    formula_text TEXT,
+    formula_expression TEXT,
+    input_fields JSON,
+    output_fields JSON,
+    sort_order INT DEFAULT 0,
+    FOREIGN KEY (category_id) REFERENCES problem_categories(id) ON DELETE CASCADE
+);
+
+-- Таблица истории расчётов
+CREATE TABLE IF NOT EXISTS calculations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    problem_type_id INT NOT NULL,
+    input_data JSON NOT NULL,
+    result_data JSON NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (problem_type_id) REFERENCES problem_types(id) ON DELETE CASCADE
+);
+
+-- Таблица пользовательских задач (конструктор)
+CREATE TABLE IF NOT EXISTS user_problems (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    name VARCHAR(200) NOT NULL,
+    description TEXT,
+    problem_type_id INT NOT NULL,
+    input_data JSON NOT NULL,
+    result_data JSON NOT NULL,
+    is_public BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (problem_type_id) REFERENCES problem_types(id) ON DELETE CASCADE
+);
+
+-- Очистка перед вставкой тестовых данных (чтобы скрипт можно было запускать повторно)
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE calculations;
+TRUNCATE TABLE user_problems;
+TRUNCATE TABLE problem_types;
+TRUNCATE TABLE problem_categories;
+TRUNCATE TABLE constants;
+TRUNCATE TABLE users;
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- ================= НАПОЛНЕНИЕ ДАННЫМИ =================
+
+-- Пользователи: пароль для всех '123456'. Захеширован встроенной функцией PHP password_hash('123456', PASSWORD_DEFAULT)
+INSERT INTO users (username, email, password_hash, role) VALUES
+('admin', 'admin@mail.test', '$2y$10$uOBfmBxTveAsSjO6uxPcXOTkMkeQPH9YJF2sOKyub9aBrktq6svnW', 'admin'),
+('ivan_student', 'ivan@mail.test', '$2y$10$uOBfmBxTveAsSjO6uxPcXOTkMkeQPH9YJF2sOKyub9aBrktq6svnW', 'user'),
+('teacher', 'teacher@mail.test', '$2y$10$uOBfmBxTveAsSjO6uxPcXOTkMkeQPH9YJF2sOKyub9aBrktq6svnW', 'user');
+
+-- Категории задач
+INSERT INTO problem_categories (name, description, sort_order) VALUES
+('Кинематика', 'Движение тел, скорость, ускорение, время, расстояние', 1),
+('Динамика', 'Силы, масса, ускорение, законы Ньютона', 2),
+('Работа и энергия', 'Механическая работа, кинетическая и потенциальная энергия', 3);
+
+-- Физические константы
+INSERT INTO constants (name, symbol, value, unit, description) VALUES
+('Ускорение свободного падения', 'g', 9.8000000000, 'м/с²', 'Стандартное ускорение свободного падения на Земле'),
+('Гравитационная постоянная', 'G', 0.0000000001, 'Н·м²/кг²', 'Фундаментальная физическая константа'),
+('Плотность воды', 'ρ_вода', 1000.0000000000, 'кг/м³', 'Плотность воды при 4°C'),
+('Стандартное атмосферное давление', 'P_атм', 101325.0000000000, 'Па', 'Давление на уровне моря'),
+('Скорость света в вакууме', 'c', 299792458.0000000000, 'м/с', 'Физическая константа скорости света');
+
+-- Типы задач (Формулы)
+INSERT INTO problem_types (category_id, name, description, formula_text, formula_expression, input_fields, output_fields, sort_order) VALUES
+(1, 'Равномерное движение', 's = v·t', 's = v × t', 's=v*t', 
+ '{"fields":[{"name":"v","label":"Скорость (v)","unit":"м/с","required":false},{"name":"t","label":"Время (t)","unit":"с","required":false},{"name":"s","label":"Расстояние (s)","unit":"м","required":false}]}',
+ '{"fields":[{"name":"v","label":"Скорость","unit":"м/с"},{"name":"t","label":"Время","unit":"с"},{"name":"s","label":"Расстояние","unit":"м"}]}', 1),
+
+(1, 'Равноускоренное движение', 's = a·t²/2', 's = a·t²/2, v = a·t', 
+ '{"s":"a*t*t/2","v":"a*t"}',
+ '{"fields":[{"name":"a","label":"Ускорение (a)","unit":"м/с²","required":false},{"name":"t","label":"Время (t)","unit":"с","required":false}]}',
+ '{"fields":[{"name":"s","label":"Расстояние","unit":"м"},{"name":"v","label":"Скорость","unit":"м/с"}]}', 2),
+
+(2, 'Второй закон Ньютона', 'F = m·a', 'F = m × a', 
+ '{"F":"m*a","m":"F/a","a":"F/m"}',
+ '{"fields":[{"name":"m","label":"Масса (m)","unit":"кг","required":false},{"name":"a","label":"Ускорение (a)","unit":"м/с²","required":false},{"name":"F","label":"Сила (F)","unit":"Н","required":false}]}',
+ '{"fields":[{"name":"m","label":"Масса","unit":"кг"},{"name":"a","label":"Ускорение","unit":"м/с²"},{"name":"F","label":"Сила","unit":"Н"}]}', 1),
+
+(2, 'Сила тяжести', 'F = m·g', 'F = m × g', 
+ '{"F":"m*9.8"}',
+ '{"fields":[{"name":"m","label":"Масса (m)","unit":"кг","required":true}]}',
+ '{"fields":[{"name":"F","label":"Сила тяжести","unit":"Н"}]}', 2),
+
+(3, 'Кинетическая энергия', 'E = m·v²/2', 'E = m·v²/2', 
+ '{"E":"m*v*v/2"}',
+ '{"fields":[{"name":"m","label":"Масса (m)","unit":"кг","required":true},{"name":"v","label":"Скорость (v)","unit":"м/с","required":true}]}',
+ '{"fields":[{"name":"E","label":"Энергия","unit":"Дж"}]}', 1);
+
+-- История тестовых расчетов
+INSERT INTO calculations (user_id, problem_type_id, input_data, result_data) VALUES
+(2, 1, '{"v": 10, "t": 5}', '{"s": 50}'),
+(2, 3, '{"m": 15, "a": 2}', '{"F": 30}'),
+(3, 4, '{"m": 5}', '{"F": 49}');
