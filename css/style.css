@@ -159,3 +159,35 @@ body {
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Таблицы для админ-панели */
+.glass-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    color: var(--text-primary);
+}
+
+.glass-table th, .glass-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--glass-border);
+    text-align: left;
+}
+
+.glass-table th {
+    font-weight: 600;
+    color: #cbd5e1;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.glass-table tr:hover td {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.glass-table code {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    color: #a5b4fc;
+}
