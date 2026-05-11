@@ -13,7 +13,7 @@ require_once __DIR__ . '/includes/header.php';
                 <p>Вы успешно авторизованы как <strong style="color: #6366f1;"><?= $username ?></strong> (Роль: <?= $role ?>).</p>
                 <p style="margin: 15px 0;">Вам полностью доступен весь функционал системы: сохранение истории, использование конструктора задач и персонализированные расчеты.</p>
                 <div class="hero-actions">
-                    <a href="#" class="btn btn-primary">Перейти к калькулятору</a>
+                    <a href="/calculator.php" class="btn btn-primary">Перейти к калькулятору</a>
                     <a href="#" class="btn btn-secondary">Моя история</a>
                 </div>
             </div>

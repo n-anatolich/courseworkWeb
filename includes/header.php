@@ -29,7 +29,7 @@ $role = $isLoggedIn ? $_SESSION['role'] : 'guest';
             <nav class="main-nav">
                 <ul>
                     <li><a href="/">Главная</a></li>
-                    <li><a href="#">Калькулятор</a></li>
+                    <li><a href="/calculator.php">Калькулятор</a></li>
                     <li><a href="#">Справочник</a></li>
                     <?php if ($isLoggedIn): ?>
                         <?php if ($role === 'admin'): ?>
