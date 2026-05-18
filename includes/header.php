@@ -30,7 +30,9 @@ $role = $isLoggedIn ? $_SESSION['role'] : 'guest';
                 <ul>
                     <li><a href="/">Главная</a></li>
                     <li><a href="/calculator.php">Калькулятор</a></li>
-                    <li><a href="#">Справочник</a></li>
+                    <?php if ($isLoggedIn): ?>
+                        <li><a href="/history.php">Моя история</a></li>
+                    <?php endif; ?>
                     <?php if ($isLoggedIn): ?>
                         <?php if ($role === 'admin'): ?>
                             <li><a href="/admin/index.php" class="admin-link">Админ-панель</a></li>

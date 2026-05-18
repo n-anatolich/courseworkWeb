@@ -129,6 +129,30 @@ class PhysicsCalculator {
                     $result['success'] = true;
                     break;
 
+                case 6: // Механическая работа (A = Fs)
+                    $F = $inputs['F'] ?? null;
+                    $s = $inputs['s'] ?? null;
+                    if (is_null($F) || is_null($s)) throw new Exception("Введите силу и перемещение.");
+                    
+                    $result['formula'] = "A = F × s";
+                    $result['results']['A'] = $F * $s;
+                    $result['steps'][] = "Формула: A = F × s";
+                    $result['steps'][] = "A = {$F} × {$s} = " . round($result['results']['A'], 4) . " Дж";
+                    $result['success'] = true;
+                    break;
+
+                case 7: // Импульс (p = mv)
+                    $m = $inputs['m'] ?? null;
+                    $v = $inputs['v'] ?? null;
+                    if (is_null($m) || is_null($v)) throw new Exception("Введите массу и скорость.");
+                    
+                    $result['formula'] = "p = m × v";
+                    $result['results']['p'] = $m * $v;
+                    $result['steps'][] = "Формула: p = m × v";
+                    $result['steps'][] = "p = {$m} × {$v} = " . round($result['results']['p'], 4) . " кг·м/с";
+                    $result['success'] = true;
+                    break;
+
                 default:
                     throw new Exception("Неизвестный тип задачи.");
             }

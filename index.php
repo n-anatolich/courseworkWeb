@@ -14,7 +14,7 @@ require_once __DIR__ . '/includes/header.php';
                 <p style="margin: 15px 0;">Вам полностью доступен весь функционал системы: сохранение истории, использование конструктора задач и персонализированные расчеты.</p>
                 <div class="hero-actions">
                     <a href="/calculator.php" class="btn btn-primary">Перейти к калькулятору</a>
-                    <a href="#" class="btn btn-secondary">Моя история</a>
+                    <a href="/history.php" class="btn btn-secondary">Моя история</a>
                 </div>
             </div>
         <?php else: ?>
