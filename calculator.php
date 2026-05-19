@@ -167,6 +167,14 @@ foreach ($problems as $p) {
 </div>
 
 <script>
+  window.MathJax = {
+    tex: { inlineMath: [['\\(', '\\)']] },
+    startup: { typeset: false } // Отключаем авторендеринг при загрузке, будем рендерить вручную
+  };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+<script>
 // Передаем данные из PHP в JS
 const problemsData = <?= json_encode($problemsData, JSON_UNESCAPED_UNICODE) ?>;
 const select = document.getElementById('problem-select');
@@ -312,6 +320,14 @@ calcForm.addEventListener('submit', function(e) {
             
             // Плавный скролл к результату
             resultArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            // Рендерим формулы MathJax в пошаговом решении
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise([solutionSteps]).catch(function (err) {
+                    console.log('MathJax error: ', err.message);
+                });
+            }
+
         } else {
             successResult.style.display = 'none';
             errorMsg.style.display = 'block';

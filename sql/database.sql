@@ -134,7 +134,33 @@ INSERT INTO problem_types (id, category_id, name, description, formula_text, for
 
 (7, 4, 'Импульс тела', 'p = m·v', 'p = m × v', '{"p":"m*v"}', 
  '{"fields":[{"name":"m","label":"Масса (m)","unit":"кг","required":true},{"name":"v","label":"Скорость (v)","unit":"м/с","required":true}]}',
- '{"fields":[{"name":"p","label":"Импульс","unit":"кг·м/с"}]}', 1);
+ '{"fields":[{"name":"p","label":"Импульс","unit":"кг·м/с"}]}', 1),
+
+(8, 1, 'Равноускоренное движение (с нач. скоростью)', 's = v₀·t + a·t²/2', 's = v_0 \cdot t + \frac{a \cdot t^2}{2}', '{"s":"v0*t + a*t*t/2"}', '{"fields":[{"name":"v0","label":"Нач. скорость (v₀)","unit":"м/с","required":true},{"name":"a","label":"Ускорение (a)","unit":"м/с²","required":true},{"name":"t","label":"Время (t)","unit":"с","required":true}]}', '{"fields":[{"name":"s","label":"Расстояние","unit":"м"},{"name":"v","label":"Конечная скорость","unit":"м/с"}]}', 3),
+
+(9, 1, 'Свободное падение', 'h = g·t²/2', 'h = \frac{g \cdot t^2}{2}', '{"h":"g*t*t/2"}', '{"fields":[{"name":"t","label":"Время (t)","unit":"с","required":true}]}', '{"fields":[{"name":"h","label":"Высота","unit":"м"},{"name":"v","label":"Скорость","unit":"м/с"}]}', 4),
+
+(10, 1, 'Движение брошенного тела', 'h = v₀·t - g·t²/2', 'h = v_0 \cdot t - \frac{g \cdot t^2}{2}', '{"h":"v0*t - g*t*t/2"}', '{"fields":[{"name":"v0","label":"Нач. скорость (v₀)","unit":"м/с","required":true},{"name":"t","label":"Время (t)","unit":"с","required":true}]}', '{"fields":[{"name":"h","label":"Высота","unit":"м"}]}', 5),
+
+(11, 2, 'Сила трения', 'Fтр = μ·N', 'F_{тр} = \mu \cdot N', '{"F":"mu*N"}', '{"fields":[{"name":"mu","label":"Коэф. трения (μ)","unit":"","required":true},{"name":"N","label":"Сила реакции (N)","unit":"Н","required":true}]}', '{"fields":[{"name":"F","label":"Сила трения","unit":"Н"}]}', 3),
+
+(12, 2, 'Закон всемирного тяготения', 'F = G·m₁·m₂/r²', 'F = G \frac{m_1 \cdot m_2}{r^2}', '{"F":"G*m1*m2/(r*r)"}', '{"fields":[{"name":"m1","label":"Масса 1 (m₁)","unit":"кг","required":true},{"name":"m2","label":"Масса 2 (m₂)","unit":"кг","required":true},{"name":"r","label":"Расстояние (r)","unit":"м","required":true}]}', '{"fields":[{"name":"F","label":"Сила","unit":"Н"}]}', 4),
+
+(13, 2, 'Движение по окружности', 'aц = v²/r', 'a_ц = \frac{v^2}{r}', '{"ac":"v*v/r"}', '{"fields":[{"name":"m","label":"Масса (m)","unit":"кг","required":true},{"name":"v","label":"Скорость (v)","unit":"м/с","required":true},{"name":"r","label":"Радиус (r)","unit":"м","required":true}]}', '{"fields":[{"name":"ac","label":"Ускорение (aц)","unit":"м/с²"},{"name":"Fc","label":"Сила (Fц)","unit":"Н"}]}', 5),
+
+(14, 3, 'Потенциальная энергия', 'Eп = m·g·h', 'E_п = m \cdot g \cdot h', '{"Ep":"m*g*h"}', '{"fields":[{"name":"m","label":"Масса (m)","unit":"кг","required":true},{"name":"h","label":"Высота (h)","unit":"м","required":true}]}', '{"fields":[{"name":"Ep","label":"Потенц. энергия","unit":"Дж"}]}', 3),
+
+(15, 3, 'Мощность', 'P = A/t', 'P = \frac{A}{t}', '{"P":"A/t"}', '{"fields":[{"name":"A","label":"Работа (A)","unit":"Дж","required":true},{"name":"t","label":"Время (t)","unit":"с","required":true}]}', '{"fields":[{"name":"P","label":"Мощность","unit":"Вт"}]}', 4),
+
+(16, 4, 'Изменение импульса', 'Δp = F·Δt', '\Delta p = F \cdot \Delta t', '{"dp":"F*t"}', '{"fields":[{"name":"F","label":"Сила (F)","unit":"Н","required":true},{"name":"t","label":"Время (Δt)","unit":"с","required":true}]}', '{"fields":[{"name":"dp","label":"Изм. импульса","unit":"кг·м/с"}]}', 2),
+
+(17, 4, 'Абсолютно неупругий удар', 'u = (m₁v₁ + m₂v₂)/(m₁+m₂)', 'u = \frac{m_1 v_1 + m_2 v_2}{m_1 + m_2}', '{"u":"(m1*v1+m2*v2)/(m1+m2)"}', '{"fields":[{"name":"m1","label":"Масса 1 (m₁)","unit":"кг","required":true},{"name":"v1","label":"Скорость 1 (v₁)","unit":"м/с","required":true},{"name":"m2","label":"Масса 2 (m₂)","unit":"кг","required":true},{"name":"v2","label":"Скорость 2 (v₂)","unit":"м/с","required":true}]}', '{"fields":[{"name":"u","label":"Общая скорость","unit":"м/с"}]}', 3),
+
+(18, 5, 'Давление твёрдого тела', 'p = F/S', 'p = \frac{F}{S}', '{"p":"F/S"}', '{"fields":[{"name":"F","label":"Сила (F)","unit":"Н","required":true},{"name":"S","label":"Площадь (S)","unit":"м²","required":true}]}', '{"fields":[{"name":"p","label":"Давление","unit":"Па"}]}', 1),
+
+(19, 5, 'Гидростатическое давление', 'p = ρ·g·h', 'p = \rho \cdot g \cdot h', '{"p":"rho*g*h"}', '{"fields":[{"name":"rho","label":"Плотность (ρ)","unit":"кг/м³","required":true},{"name":"h","label":"Глубина (h)","unit":"м","required":true}]}', '{"fields":[{"name":"p","label":"Давление","unit":"Па"}]}', 2),
+
+(20, 5, 'Сила Архимеда', 'Fₐ = ρ·g·V', 'F_a = \rho \cdot g \cdot V', '{"Fa":"rho*g*V"}', '{"fields":[{"name":"rho","label":"Плотность (ρ)","unit":"кг/м³","required":true},{"name":"V","label":"Объём (V)","unit":"м³","required":true}]}', '{"fields":[{"name":"Fa","label":"Сила Архимеда","unit":"Н"}]}', 3);
 
 -- 20 тестовых расчетов для демонстрации дашборда администратора и страниц истории
 INSERT INTO calculations (user_id, problem_type_id, input_data, result_data) VALUES
