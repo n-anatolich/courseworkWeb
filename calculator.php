@@ -111,6 +111,12 @@ if (isset($_SESSION['user_id'])) {
                 
                 <h4 style="color: var(--text-secondary); margin-bottom: 15px; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;">Пошаговое решение:</h4>
                 <div id="solution-steps" style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; font-family: monospace; color: #cbd5e1; line-height: 1.8; border: 1px solid rgba(255,255,255,0.05);"></div>
+                
+                <div id="canvas-container" style="display: none; margin-top: 25px; background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
+                    <h4 style="color: var(--text-secondary); margin-bottom: 15px; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;">Визуализация:</h4>
+                    <canvas id="schema-canvas" width="600" height="200" style="background: #e2e8f0; border-radius: 4px; max-width: 100%; height: auto;"></canvas>
+                </div>
+
             </div>
         </div>
     </div>
@@ -137,6 +143,61 @@ const errorMsg = document.getElementById('error-msg');
 const successResult = document.getElementById('success-result');
 const finalAnswers = document.getElementById('final-answers');
 const solutionSteps = document.getElementById('solution-steps');
+const canvasContainer = document.getElementById('canvas-container');
+const canvas = document.getElementById('schema-canvas');
+const ctx = canvas ? canvas.getContext('2d') : null;
+
+// Функция отрисовки схем на Canvas
+function drawSchema(problemId) {
+    if (!ctx) return;
+    
+    // Очищаем холст
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Включаем отображение только для поддерживаемых базовых задач
+    if (problemId == 1 || problemId == 3) {
+        canvasContainer.style.display = 'block';
+    } else {
+        canvasContainer.style.display = 'none';
+        return;
+    }
+
+    if (problemId == 1) { 
+        // Схема: Равномерное движение
+        // Дорога
+        ctx.beginPath(); ctx.moveTo(50, 150); ctx.lineTo(550, 150);
+        ctx.lineWidth = 3; ctx.strokeStyle = '#475569'; ctx.stroke();
+        // Автомобиль / Блок
+        ctx.fillStyle = '#6366f1'; ctx.fillRect(100, 110, 80, 40);
+        // Вектор скорости
+        ctx.beginPath(); ctx.moveTo(190, 130); ctx.lineTo(280, 130); ctx.lineTo(270, 125);
+        ctx.moveTo(280, 130); ctx.lineTo(270, 135);
+        ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 3; ctx.stroke();
+        // Подписи
+        ctx.fillStyle = '#ef4444'; ctx.font = 'bold 18px Arial'; ctx.fillText('v', 230, 115);
+        ctx.fillStyle = '#475569'; ctx.fillText('s', 320, 175);
+    } 
+    else if (problemId == 3) { 
+        // Схема: Второй закон Ньютона
+        // Поверхность
+        ctx.beginPath(); ctx.moveTo(100, 150); ctx.lineTo(500, 150);
+        ctx.lineWidth = 3; ctx.strokeStyle = '#475569'; ctx.stroke();
+        // Блок массы
+        ctx.fillStyle = '#10b981'; ctx.fillRect(250, 90, 100, 60);
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 20px Arial'; ctx.fillText('m', 290, 128);
+        // Вектор силы F
+        ctx.beginPath(); ctx.moveTo(350, 120); ctx.lineTo(460, 120); ctx.lineTo(450, 115);
+        ctx.moveTo(460, 120); ctx.lineTo(450, 125);
+        ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 4; ctx.stroke();
+        ctx.fillStyle = '#ef4444'; ctx.fillText('F', 410, 110);
+        // Вектор ускорения a
+        ctx.beginPath(); ctx.moveTo(250, 60); ctx.lineTo(350, 60); ctx.lineTo(340, 55);
+        ctx.moveTo(350, 60); ctx.lineTo(340, 65);
+        ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.fillStyle = '#f59e0b'; ctx.fillText('a', 295, 50);
+    }
+}
+
 
 // 1. Отрисовка полей ввода при выборе задачи
 select.addEventListener('change', function() {
@@ -245,6 +306,8 @@ calcForm.addEventListener('submit', function(e) {
             if (window.MathJax && MathJax.typesetPromise) {
                 MathJax.typesetPromise([solutionSteps]).catch(err => console.log('MathJax error: ', err.message));
             }
+            // Отрисовка схемы
+            drawSchema(problemId);
         } else {
             successResult.style.display = 'none';
             errorMsg.style.display = 'block';
