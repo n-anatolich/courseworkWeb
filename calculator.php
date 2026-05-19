@@ -344,6 +344,48 @@ calcForm.addEventListener('submit', function(e) {
         errorMsg.textContent = 'Ошибка соединения с сервером.';
     });
 });
+
+// АВТОПОДСТАНОВКА ДАННЫХ ИЗ ИСТОРИИ
+window.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const reuseId = urlParams.get('reuse_id');
+    const reuseDataStr = urlParams.get('reuse_data');
+
+    if (reuseId && reuseDataStr) {
+        // Ищем нужный элемент в кастомном выпадающем списке
+        const dropdownItem = document.querySelector(`.dropdown-item[data-value="${reuseId}"]`);
+        
+        if (dropdownItem) {
+            // 1. Обновляем текст в UI
+            dropdownSelectedText.textContent = dropdownItem.textContent;
+            dropdownSelectedText.style.color = '#fff';
+            
+            // 2. Устанавливаем значение в select и вызываем change (это сгенерирует форму)
+            select.value = reuseId;
+            select.dispatchEvent(new Event('change'));
+            
+            // 3. Парсим JSON и заполняем поля ввода
+            try {
+                const reuseData = JSON.parse(reuseDataStr);
+                for (const key in reuseData) {
+                    const inputField = document.querySelector(`input[name="${key}"]`);
+                    if (inputField) {
+                        inputField.value = reuseData[key];
+                        // Имитируем фокус для красоты (чтобы сработали стили, если они зависят от заполненности)
+                        inputField.style.borderColor = 'var(--primary-color)';
+                        inputField.nextElementSibling.style.borderColor = 'var(--primary-color)';
+                    }
+                }
+            } catch (e) {
+                console.error('Ошибка обработки данных истории:', e);
+            }
+            
+            // 4. Очищаем параметры из URL, чтобы данные не подставлялись заново при обновлении страницы (F5)
+            window.history.replaceState(null, '', window.location.pathname);
+        }
+    }
+});
+
 </script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

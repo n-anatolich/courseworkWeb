@@ -85,6 +85,8 @@ require_once __DIR__ . '/includes/header.php';
                             <td><code style="background: rgba(0,0,0,0.2);"><?= implode(', ', $inStr) ?></code></td>
                             <td><code style="background: rgba(16, 185, 129, 0.2); color: #6ee7b7;"><?= implode(', ', $outStr) ?></code></td>
                             <td style="text-align: right;">
+                                <a href="/calculator.php?reuse_id=<?= $row['problem_type_id'] ?>&reuse_data=<?= urlencode($row['input_data']) ?>" class="btn btn-primary" style="padding: 5px 10px; font-size: 0.8rem; margin-right: 5px;">Повторить</a>
+                                
                                 <a href="/history.php?delete=<?= $row['id'] ?>" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.8rem; color: #ef4444; border-color: rgba(239, 68, 68, 0.3);" onclick="return confirm('Удалить этот расчёт?');">Удалить</a>
                             </td>
                         </tr>
