@@ -28,8 +28,8 @@ $role = $isLoggedIn ? $_SESSION['role'] : 'guest';
             </h1>
             <nav class="main-nav">
                 <ul>
-                    <li><a href="/">Главная</a></li>
                     <li><a href="/calculator.php">Калькулятор</a></li>
+                    <li><a href="/reference.php">Справочник</a></li> 
                     <?php if ($isLoggedIn): ?>
                         <li><a href="/history.php">Моя история</a></li>
                     <?php endif; ?>

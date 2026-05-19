@@ -15,19 +15,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($login) || empty($password)) {
         $error = "Пожалуйста, введите логин и пароль.";
     } else {
-        // Ищем по логину ИЛИ email
-        $stmt = $pdo->prepare("SELECT id, username, password_hash, role FROM users WHERE username = ? OR email = ?");
+        // Ищем по логину ИЛИ email (добавлено поле is_blocked)
+        $stmt = $pdo->prepare("SELECT id, username, password_hash, role, is_blocked FROM users WHERE username = ? OR email = ?");
         $stmt->execute([$login, $login]);
         $user = $stmt->fetch();
         
         if ($user && password_verify($password, $user['password_hash'])) {
-            // Инициализация сессии
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['role'] = $user['role'];
-            
-            header("Location: /index.php");
-            exit;
+            // Проверка блокировки аккаунта
+            if ($user['is_blocked']) {
+                $error = "Ваш аккаунт был заблокирован администратором.";
+            } else {
+                // Инициализация сессии
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['role'] = $user['role'];
+                
+                header("Location: /index.php");
+                exit;
+            }
         } else {
             $error = "Неверный логин или пароль.";
         }
