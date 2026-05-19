@@ -22,27 +22,27 @@ class PhysicsCalculator {
 
                     if (!is_null($v) && !is_null($t)) {
                         $res = $v * $t;
-                        $result['formula'] = "s = v × t";
+                        $result['formula'] = "\\( s = v \\cdot t \\)";
                         $result['results']['s'] = $res;
-                        $result['steps'][] = "Формула расстояния: s = v × t";
-                        $result['steps'][] = "Подставляем значения: s = {$v} × {$t}";
-                        $result['steps'][] = "Результат: s = " . round($res, 4) . " м";
+                        $result['steps'][] = "Формула расстояния: \\( s = v \\cdot t \\)";
+                        $result['steps'][] = "Подставляем значения: \\( s = {$v} \\cdot {$t} \\)";
+                        $result['steps'][] = "Результат: \\( s = " . round($res, 4) . " \\) м";
                     } elseif (!is_null($s) && !is_null($t)) {
                         if ($t == 0) throw new Exception("Деление на ноль! Время не может быть равно 0.");
                         $res = $s / $t;
-                        $result['formula'] = "v = s / t";
+                        $result['formula'] = "\\( v = \\frac{s}{t} \\)";
                         $result['results']['v'] = $res;
-                        $result['steps'][] = "Формула скорости: v = s / t";
-                        $result['steps'][] = "Подставляем значения: v = {$s} / {$t}";
-                        $result['steps'][] = "Результат: v = " . round($res, 4) . " м/с";
+                        $result['steps'][] = "Формула скорости: \\( v = \\frac{s}{t} \\)";
+                        $result['steps'][] = "Подставляем значения: \\( v = \\frac{{$s}}{{{$t}}} \\)";
+                        $result['steps'][] = "Результат: \\( v = " . round($res, 4) . " \\) м/с";
                     } elseif (!is_null($s) && !is_null($v)) {
                         if ($v == 0) throw new Exception("Деление на ноль! Скорость не может быть равна 0.");
                         $res = $s / $v;
-                        $result['formula'] = "t = s / v";
+                        $result['formula'] = "\\( t = \\frac{s}{v} \\)";
                         $result['results']['t'] = $res;
-                        $result['steps'][] = "Формула времени: t = s / v";
-                        $result['steps'][] = "Подставляем значения: t = {$s} / {$v}";
-                        $result['steps'][] = "Результат: t = " . round($res, 4) . " с";
+                        $result['steps'][] = "Формула времени: \\( t = \\frac{s}{v} \\)";
+                        $result['steps'][] = "Подставляем значения: \\( t = \\frac{{$s}}{{{$v}}} \\)";
+                        $result['steps'][] = "Результат: \\( t = " . round($res, 4) . " \\) с";
                     }
                     $result['success'] = true;
                     break;
@@ -57,11 +57,11 @@ class PhysicsCalculator {
                     $s = ($a * pow($t, 2)) / 2;
                     $v = $a * $t;
 
-                    $result['formula'] = "s = a·t²/2, v = a·t";
+                    $result['formula'] = "\\( s = \\frac{a \\cdot t^2}{2}, \\; v = a \\cdot t \\)";
                     $result['results']['s'] = $s;
                     $result['results']['v'] = $v;
-                    $result['steps'][] = "Расчет расстояния: s = ({$a} × {$t}²) / 2 = " . round($s, 4) . " м";
-                    $result['steps'][] = "Расчет скорости: v = {$a} × {$t} = " . round($v, 4) . " м/с";
+                    $result['steps'][] = "Расчет расстояния: \\( s = \\frac{{$a} \\cdot {$t}^2}{2} = " . round($s, 4) . " \\) м";
+                    $result['steps'][] = "Расчет скорости: \\( v = {$a} \\cdot {$t} = " . round($v, 4) . " \\) м/с";
                     $result['success'] = true;
                     break;
 
@@ -76,23 +76,23 @@ class PhysicsCalculator {
 
                     if (!is_null($m) && !is_null($a)) {
                         $res = $m * $a;
-                        $result['formula'] = "F = m × a";
+                        $result['formula'] = "\\( F = m \\cdot a \\)";
                         $result['results']['F'] = $res;
-                        $result['steps'][] = "Используем базовую формулу: F = m × a";
-                        $result['steps'][] = "F = {$m} × {$a} = " . round($res, 4) . " Н";
+                        $result['steps'][] = "Используем базовую формулу: \\( F = m \\cdot a \\)";
+                        $result['steps'][] = "Расчет: \\( F = {$m} \\cdot {$a} = " . round($res, 4) . " \\) Н";
                     } elseif (!is_null($F) && !is_null($m)) {
                         $res = $F / $m;
-                        $result['formula'] = "a = F / m";
+                        $result['formula'] = "\\( a = \\frac{F}{m} \\)";
                         $result['results']['a'] = $res;
-                        $result['steps'][] = "Выражаем ускорение: a = F / m";
-                        $result['steps'][] = "a = {$F} / {$m} = " . round($res, 4) . " м/с²";
+                        $result['steps'][] = "Выражаем ускорение: \\( a = \\frac{F}{m} \\)";
+                        $result['steps'][] = "Расчет: \\( a = \\frac{{$F}}{{{$m}}} = " . round($res, 4) . " \\) м/с²";
                     } elseif (!is_null($F) && !is_null($a)) {
                         if ($a == 0) throw new Exception("Ускорение не может быть 0 при поиске массы (деление на ноль).");
                         $res = $F / $a;
-                        $result['formula'] = "m = F / a";
+                        $result['formula'] = "\\( m = \\frac{F}{a} \\)";
                         $result['results']['m'] = $res;
-                        $result['steps'][] = "Выражаем массу: m = F / a";
-                        $result['steps'][] = "m = {$F} / {$a} = " . round($res, 4) . " кг";
+                        $result['steps'][] = "Выражаем массу: \\( m = \\frac{F}{a} \\)";
+                        $result['steps'][] = "Расчет: \\( m = \\frac{{$F}}{{{$a}}} = " . round($res, 4) . " \\) кг";
                     }
                     $result['success'] = true;
                     break;
@@ -102,14 +102,14 @@ class PhysicsCalculator {
                     if (is_null($m)) throw new Exception("Введите массу.");
                     if ($m < 0) throw new Exception("Масса не может быть отрицательной.");
 
-                    $g = 9.8; // Для расширения можно тянуть из БД
+                    $g = 9.8;
                     $F = $m * $g;
                     
-                    $result['formula'] = "F = m × g";
+                    $result['formula'] = "\\( F = m \\cdot g \\)";
                     $result['results']['F'] = $F;
-                    $result['steps'][] = "Формула: F = m × g (где g ≈ 9.8 м/с²)";
-                    $result['steps'][] = "Подставляем значения: F = {$m} × 9.8";
-                    $result['steps'][] = "Результат: F = " . round($F, 4) . " Н";
+                    $result['steps'][] = "Формула: \\( F = m \\cdot g \\) (где \\( g \\approx 9.8 \\) м/с²)";
+                    $result['steps'][] = "Подставляем значения: \\( F = {$m} \\cdot 9.8 \\)";
+                    $result['steps'][] = "Результат: \\( F = " . round($F, 4) . " \\) Н";
                     $result['success'] = true;
                     break;
 
@@ -121,11 +121,10 @@ class PhysicsCalculator {
 
                     $E = ($m * pow($v, 2)) / 2;
                     
-                    $result['formula'] = "E = m·v²/2";
+                    $result['formula'] = "\\( E = \\frac{m \\cdot v^2}{2} \\)";
                     $result['results']['E'] = $E;
-                    $result['steps'][] = "Формула: E = (m × v²) / 2";
-                    $result['steps'][] = "Подставляем: E = ({$m} × {$v}²) / 2";
-                    $result['steps'][] = "Результат: E = " . round($E, 4) . " Дж";
+                    $result['steps'][] = "Формула: \\( E = \\frac{m \\cdot v^2}{2} \\)";
+                    $result['steps'][] = "Подставляем: \\( E = \\frac{{$m} \\cdot {$v}^2}{2} = " . round($E, 4) . " \\) Дж";
                     $result['success'] = true;
                     break;
 
@@ -134,10 +133,10 @@ class PhysicsCalculator {
                     $s = $inputs['s'] ?? null;
                     if (is_null($F) || is_null($s)) throw new Exception("Введите силу и перемещение.");
                     
-                    $result['formula'] = "A = F × s";
+                    $result['formula'] = "\\( A = F \\cdot s \\)";
                     $result['results']['A'] = $F * $s;
-                    $result['steps'][] = "Формула: A = F × s";
-                    $result['steps'][] = "A = {$F} × {$s} = " . round($result['results']['A'], 4) . " Дж";
+                    $result['steps'][] = "Формула: \\( A = F \\cdot s \\)";
+                    $result['steps'][] = "Расчет: \\( A = {$F} \\cdot {$s} = " . round($result['results']['A'], 4) . " \\) Дж";
                     $result['success'] = true;
                     break;
 
@@ -146,10 +145,10 @@ class PhysicsCalculator {
                     $v = $inputs['v'] ?? null;
                     if (is_null($m) || is_null($v)) throw new Exception("Введите массу и скорость.");
                     
-                    $result['formula'] = "p = m × v";
+                    $result['formula'] = "\\( p = m \\cdot v \\)";
                     $result['results']['p'] = $m * $v;
-                    $result['steps'][] = "Формула: p = m × v";
-                    $result['steps'][] = "p = {$m} × {$v} = " . round($result['results']['p'], 4) . " кг·м/с";
+                    $result['steps'][] = "Формула: \\( p = m \\cdot v \\)";
+                    $result['steps'][] = "Расчет: \\( p = {$m} \\cdot {$v} = " . round($result['results']['p'], 4) . " \\) кг·м/с";
                     $result['success'] = true;
                     break;
                 
