@@ -30,7 +30,11 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="glass-panel" style="padding: 30px; width: 100%; max-width: 1000px; margin: 0 auto;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
         <h2>Панель администратора</h2>
-        <a href="/admin/constants.php" class="btn btn-primary">Управление константами</a>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
+            <a href="/admin/users.php" class="btn btn-secondary">Пользователи</a>
+            <a href="/admin/problems.php" class="btn btn-secondary">Задачи</a>
+            <a href="/admin/constants.php" class="btn btn-primary">Константы</a>
+        </div>
     </div>
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px;">
