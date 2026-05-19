@@ -18,9 +18,31 @@ foreach ($problems as $p) {
         'name' => $p['name'],
         'category' => $p['category_name'],
         'description' => $p['description'],
+        'base_id' => $p['id'],
         'input_fields' => json_decode($p['input_fields'], true)['fields'] ?? [],
-        'output_fields' => json_decode($p['output_fields'], true)['fields'] ?? []
+        'output_fields' => json_decode($p['output_fields'], true)['fields'] ?? [],
+        'prefilled' => []
     ];
+}
+
+$userProblems = [];
+if (isset($_SESSION['user_id'])) {
+    $stmt = $pdo->prepare("SELECT up.*, pt.input_fields, pt.output_fields FROM user_problems up JOIN problem_types pt ON up.problem_type_id = pt.id WHERE up.user_id = ? OR up.is_public = TRUE");
+    $stmt->execute([$_SESSION['user_id']]);
+    $userProblems = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($userProblems as $up) {
+        $idKey = 'custom_' . $up['id'];
+        $problemsData[$idKey] = [
+            'name' => $up['name'],
+            'category' => 'Пользовательские задачи',
+            'description' => $up['description'],
+            'base_id' => $up['problem_type_id'],
+            'input_fields' => json_decode($up['input_fields'], true)['fields'] ?? [],
+            'output_fields' => json_decode($up['output_fields'], true)['fields'] ?? [],
+            'prefilled' => json_decode($up['input_data'], true) ?? []
+        ];
+    }
 }
 ?>
 
@@ -129,6 +151,13 @@ foreach ($problems as $p) {
                         echo "<div class=\"dropdown-item\" data-value=\"{$p['id']}\">" . htmlspecialchars($p['name']) . "</div>";
                     }
                     ?>
+                    
+                    <?php if (!empty($userProblems)): ?>
+                        <div class="dropdown-group" style="background: rgba(99, 102, 241, 0.1); color: #fff; border-top: 1px solid var(--primary-color);">Пользовательские задачи</div>
+                        <?php foreach ($userProblems as $up): ?>
+                            <div class="dropdown-item" data-value="custom_<?= $up['id'] ?>">⭐ <?= htmlspecialchars($up['name']) ?></div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -136,6 +165,9 @@ foreach ($problems as $p) {
                 <option value="">Выберите задачу</option>
                 <?php foreach ($problems as $p): ?>
                     <option value="<?= $p['id'] ?>"><?= htmlspecialchars($p['name']) ?></option>
+                <?php endforeach; ?>
+                <?php foreach ($userProblems as $up): ?>
+                    <option value="custom_<?= $up['id'] ?>"></option>
                 <?php endforeach; ?>
             </select>
         </div>
@@ -244,13 +276,17 @@ select.addEventListener('change', function() {
     // Генерируем поля ввода
     container.innerHTML = '';
     data.input_fields.forEach(field => {
+        const prefilledVal = data.prefilled && data.prefilled[field.name] !== undefined ? data.prefilled[field.name] : '';
+        const isReadonly = prefilledVal !== '' ? 'readonly' : '';
+        const inputStyle = prefilledVal !== '' ? 'background: rgba(99, 102, 241, 0.15); border-color: var(--primary-color); opacity: 0.8;' : 'background:rgba(0,0,0,0.3);';
+
         const div = document.createElement('div');
         div.className = 'form-group';
         div.innerHTML = `
-            <label style="color: #cbd5e1; font-weight: 500;">${field.label} ${field.required ? '<span style="color:#ef4444">*</span>' : ''}</label>
+            <label style="color: #cbd5e1; font-weight: 500;">${field.label} ${field.required && prefilledVal === '' ? '<span style="color:#ef4444">*</span>' : ''}</label>
             <div style="display:flex; align-items:stretch; margin-top: 8px;">
-                <input type="number" step="any" name="${field.name}" placeholder="0.0" ${field.required ? 'required' : ''} 
-                    style="flex:1; padding:12px 16px; background:rgba(0,0,0,0.3); color:#fff; border:1px solid var(--glass-border); border-right:none; border-radius:8px 0 0 8px; font-size: 1rem; transition: border-color 0.3s;">
+                <input type="number" step="any" name="${field.name}" placeholder="0.0" ${field.required && prefilledVal === '' ? 'required' : ''} value="${prefilledVal}" ${isReadonly}
+                    style="flex:1; padding:12px 16px; color:#fff; border:1px solid var(--glass-border); border-right:none; border-radius:8px 0 0 8px; font-size: 1rem; transition: border-color 0.3s; ${inputStyle}">
                 <span style="background:rgba(255,255,255,0.05); padding:12px 16px; border:1px solid var(--glass-border); border-radius:0 8px 8px 0; color:#94a3b8; display:flex; align-items:center; font-weight:600;">${field.unit}</span>
             </div>
         `;
@@ -281,6 +317,9 @@ calcForm.addEventListener('submit', function(e) {
     
     const problemId = select.value;
     
+    const problemIdKey = select.value;
+    const problemId = problemsData[problemIdKey].base_id; // Используем базовый ID для PHP-вычислений
+
     // Анимация загрузки на кнопке
     const btn = calcForm.querySelector('button');
     const originalBtnText = btn.textContent;
