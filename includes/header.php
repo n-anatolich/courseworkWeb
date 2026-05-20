@@ -22,11 +22,16 @@ $role = $isLoggedIn ? $_SESSION['role'] : 'guest';
     <header class="main-header glass-panel">
         <div class="container header-container">
             <h1 class="logo">
-                <a href="/">
-                    <span class="icon">⚛️</span> PhysCalc
+                <a href="/index.php" class="logo">PhysCalc
                 </a>
             </h1>
             <nav class="main-nav">
+                <button id="burger-btn" class="burger-menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+
                 <ul>
                     <li><a href="/calculator.php">Калькулятор</a></li>
                     <li><a href="/reference.php">Справочник</a></li> 

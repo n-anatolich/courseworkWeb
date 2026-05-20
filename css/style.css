@@ -191,3 +191,102 @@ body {
     font-family: monospace;
     color: #a5b4fc;
 }
+
+/* --- СТИЛИ БУРГЕР-МЕНЮ --- */
+.burger-menu {
+    display: none; /* Скрыто на десктопе */
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px;
+    height: 22px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 1000;
+}
+
+.burger-menu span {
+    width: 100%;
+    height: 3px;
+    background-color: #fff;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+/* Адаптивность для мобильных устройств (Бургер-меню в правом верхнем углу) */
+@media (max-width: 768px) {
+    html, body {
+        overflow-x: hidden;
+        max-width: 100%;
+    }
+
+    .header-container {
+        display: flex;
+        flex-direction: row; /* Логотип и бургер встают в одну линию */
+        justify-content: space-between; /* Логотип уходит влево, бургер — вправо */
+        align-items: center;
+        padding: 12px 20px !important;
+        position: relative;
+    }
+
+    .burger-menu {
+        display: flex; /* Показываем кнопку бургера */
+        position: relative;
+        margin-left: auto; /* Гарантирует смещение в самый правый край */
+    }
+
+    .user-greeting {
+        display: none; /* Полностью убираем приветствие на мобильных, чтобы не ломать строку */
+    }
+
+    .main-nav {
+        width: 100%; /* Контейнер навигации занимает всю ширину под логотипом */
+        order: 3; /* Смещает выпадающий список ниже линии логотипа и бургера */
+    }
+
+    .main-nav ul {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        background: rgba(15, 23, 42, 0.98);
+        padding: 10px 0;
+        border-radius: 8px;
+        margin-top: 12px;
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .main-nav ul.active {
+        display: flex; /* Показывается при клике */
+    }
+
+    .main-nav li {
+        margin: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .main-nav li:last-child {
+        border-bottom: none;
+    }
+
+    .main-nav a {
+        display: block;
+        padding: 12px 20px;
+        font-size: 1rem;
+        text-align: left; /* Выравнивание ссылок по левому краю для аккуратности */
+    }
+}
+
+    
+    /* Анимация превращения бургера в крестик (X) */
+    .burger-menu.open span:nth-child(1) {
+        transform: translateY(9.5px) rotate(45deg);
+    }
+    .burger-menu.open span:nth-child(2) {
+        opacity: 0;
+    }
+    .burger-menu.open span:nth-child(3) {
+        transform: translateY(-9.5px) rotate(-45deg);
+    }
+}
