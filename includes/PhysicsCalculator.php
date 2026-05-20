@@ -10,64 +10,87 @@ class PhysicsCalculator {
         ];
 
         try {
-            // ЭТАП 1: Анализ динамической конфигурации
+                        // ЭТАП 1 и 3: Анализ конфигурации и поиск ВСЕХ возможных переменных
             if ($problemConfig && !empty($problemConfig['formula_expression'])) {
                 $expressions = $problemConfig['formula_expression'];
-                $targetVariable = null;
-                $formulaToUse = null;
+                $formulasToCalculate = [];
+                $constants = $problemConfig['constants'] ?? [];
+                
+                // Объединяем константы и ввод пользователя в единый массив известных данных
+                $knownVariables = array_merge($constants, $inputs);
 
-                foreach ($expressions as $target => $formula) {
-                    if (!isset($inputs[$target])) {
-                        preg_match_all('/[a-zA-Z_][a-zA-Z0-9_]*/', $formula, $matches);
-                        $requiredVars = array_unique($matches[0]);
-                        
-                        $canCalculate = true;
-                        foreach ($requiredVars as $var) {
-                            $mathFunctions = ['sin', 'cos', 'tan', 'sqrt', 'pow', 'pi'];
-                            if (in_array($var, $mathFunctions)) continue;
-                            if (!isset($inputs[$var])) {
-                                $canCalculate = false;
-                                break;
+                // Проходим по формулам в цикле (вычисление одной переменной может открыть путь к другой)
+                $calculatedSomething = true;
+                while ($calculatedSomething) {
+                    $calculatedSomething = false;
+                    foreach ($expressions as $target => $formula) {
+                        // Если переменная еще не найдена и не добавлена в очередь на расчет
+                        if (!isset($knownVariables[$target]) && !isset($formulasToCalculate[$target])) {
+                            
+                            preg_match_all('/[a-zA-Z_][a-zA-Z0-9_]*/', $formula, $matches);
+                            $requiredVars = array_unique($matches[0]);
+                            
+                            $canCalculate = true;
+                            foreach ($requiredVars as $var) {
+                                $mathFunctions = ['sin', 'cos', 'tan', 'sqrt', 'pow', 'pi'];
+                                if (in_array($var, $mathFunctions)) continue;
+                                
+                                // Проверяем, есть ли нужная переменная в известных
+                                if (!isset($knownVariables[$var])) {
+                                    $canCalculate = false;
+                                    break;
+                                }
                             }
-                        }
 
-                        if ($canCalculate) {
-                            $targetVariable = $target;
-                            $formulaToUse = $formula;
-                            break; 
+                            if ($canCalculate) {
+                                $formulasToCalculate[$target] = $formula;
+                                // Временно помечаем как "известную", чтобы алгоритм мог использовать её для поиска следующих формул
+                                $knownVariables[$target] = 0; 
+                                $calculatedSomething = true;
+                            }
                         }
                     }
                 }
 
-                if (!$formulaToUse) {
+                if (empty($formulasToCalculate)) {
                     throw new Exception("Недостаточно данных для расчета. Проверьте введенные значения.");
                 }
 
-                // ЭТАП 2: Подстановка и вычисление
-                $constants = $problemConfig['constants'] ?? [];
-                $allVariables = array_merge($constants, $inputs);
-
-                $substitutedString = $formulaToUse;
-                uksort($allVariables, function($a, $b) { return strlen($b) - strlen($a); });
-                
-                foreach ($allVariables as $key => $val) {
-                    $strVal = $val < 0 ? "(" . $val . ")" : $val;
-                    $substitutedString = str_replace($key, $strVal, $substitutedString);
-                }
-
-                $calculatedValue = self::evaluateExpression($formulaToUse, $allVariables);
-
+                // ЭТАП 2: Подстановка, вычисление и генерация шагов решения
                 $result['success'] = true;
-                $result['formula'] = "\\( " . $targetVariable . " = " . $formulaToUse . " \\)";
-                $result['steps'][] = "Базовая формула: \\( " . $targetVariable . " = " . $formulaToUse . " \\)";
-                $result['steps'][] = "Подставляем значения: \\( " . $targetVariable . " = " . $substitutedString . " \\)";
-                
-                $displayValue = (abs($calculatedValue) > 10000 || (abs($calculatedValue) < 0.01 && $calculatedValue != 0)) 
-                    ? sprintf("%.4e", $calculatedValue) 
-                    : round($calculatedValue, 4);
+                // Сбрасываем пул переменных к реальным значениям для начала математики
+                $allVariables = array_merge($constants, $inputs); 
+
+                foreach ($formulasToCalculate as $target => $formulaToUse) {
+                    $substitutedString = $formulaToUse;
+                    // Сортируем ключи по длине (чтобы "v0" заменялось раньше "v")
+                    uksort($allVariables, function($a, $b) { return strlen($b) - strlen($a); });
                     
-                $result['steps'][] = "Результат: \\( " . $targetVariable . " = " . $displayValue . " \\)";
-                $result['results'][$targetVariable] = $calculatedValue;
+                    foreach ($allVariables as $key => $val) {
+                        $strVal = $val < 0 ? "(" . $val . ")" : $val;
+                        $substitutedString = str_replace($key, $strVal, $substitutedString);
+                    }
+
+                    // Вызов нашего ядра
+                    $calculatedValue = self::evaluateExpression($formulaToUse, $allVariables);
+
+                    // Добавляем вычисленный результат в пул переменных. 
+                    // Если следующей формуле понадобится эта переменная, она уже будет тут!
+                    $allVariables[$target] = $calculatedValue;
+
+                    // Форматирование для красивого вывода
+                    $displayValue = (abs($calculatedValue) > 10000 || (abs($calculatedValue) < 0.01 && $calculatedValue != 0)) 
+                        ? sprintf("%.4e", $calculatedValue) 
+                        : round($calculatedValue, 4);
+                        
+                    // Шаг 3.2: Динамическая генерация подробных шагов решения
+                    $result['steps'][] = "<span style='color: var(--primary-color);'><b>► Находим {$target}:</b></span>";
+                    $result['steps'][] = "Формула: \\( {$target} = {$formulaToUse} \\)";
+                    $result['steps'][] = "Подставляем значения: \\( {$target} = {$substitutedString} \\)";
+                    $result['steps'][] = "Результат: \\( {$target} = {$displayValue} \\)<br>";
+                    
+                    $result['results'][$target] = $calculatedValue;
+                }
                 
                 return $result; // Успешный выход из метода
             }
