@@ -15,7 +15,7 @@ if (!$inputData || !isset($inputData['problem_id']) || !isset($inputData['inputs
 $problemId = (int)$inputData['problem_id'];
 $inputs = $inputData['inputs'];
 
-// Очистка и преобразование входных данных
+// Очистка и преобразование входных данных от пользователя
 $cleanInputs = [];
 foreach ($inputs as $key => $value) {
     if (trim($value) !== '') {
@@ -23,7 +23,24 @@ foreach ($inputs as $key => $value) {
     }
 }
 
-// Получаем конфигурацию задачи из БД (формулы и настройки полей)
+// --- БЕЗОПАСНОСТЬ: Защита от подмены данных ---
+// Если это задача из конструктора, принудительно перезаписываем отправленные значения теми, что лежат в БД
+if (isset($inputData['custom_problem_id']) && $inputData['custom_problem_id']) {
+    $customProblemId = (int)$inputData['custom_problem_id'];
+    $stmtCustom = $pdo->prepare("SELECT input_data FROM user_problems WHERE id = ?");
+    $stmtCustom->execute([$customProblemId]);
+    $customProblem = $stmtCustom->fetch(PDO::FETCH_ASSOC);
+    
+    if ($customProblem) {
+        $hardcodedInputs = json_decode($customProblem['input_data'], true) ?? [];
+        foreach ($hardcodedInputs as $key => $val) {
+            // Перезаписываем то, что прислал пользователь, истинными значениями констант задачи
+            $cleanInputs[$key] = (float)$val;
+        }
+    }
+}
+
+// Получаем конфигурацию базовой задачи из БД (формулы и настройки полей)
 $stmt = $pdo->prepare("SELECT formula_text, formula_expression, output_fields FROM problem_types WHERE id = ?");
 $stmt->execute([$problemId]);
 $problemConfig = $stmt->fetch(PDO::FETCH_ASSOC);

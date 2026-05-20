@@ -1,96 +1,104 @@
 <?php
 require_once __DIR__ . '/includes/db.php';
 
-// Доступ только для авторизованных
+// Только для авторизованных
 if (!isset($_SESSION['user_id'])) {
     header("Location: /login.php");
     exit;
 }
 
-// Удаление записи
-if (isset($_GET['delete'])) {
-    $delId = (int)$_GET['delete'];
+// --- ШАГ 2.2: Обработка удаления расчета ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete' && isset($_POST['delete_id'])) {
+    $delete_id = (int)$_POST['delete_id'];
+    
+    // Удаляем ТОЛЬКО если это расчет текущего авторизованного пользователя (защита)
     $stmt = $pdo->prepare("DELETE FROM calculations WHERE id = ? AND user_id = ?");
-    $stmt->execute([$delId, $_SESSION['user_id']]);
+    $stmt->execute([$delete_id, $_SESSION['user_id']]);
+    
     header("Location: /history.php?msg=deleted");
     exit;
 }
 
-// Пагинация
+// --- ШАГ 2.2: Настройки пагинации ---
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-$limit = 10;
+$limit = 10; // Показывать по 10 записей на странице
 $offset = ($page - 1) * $limit;
 
-// Подсчет записей
-$userId = $_SESSION['user_id'];
+// Подсчет общего количества записей текущего пользователя
 $countStmt = $pdo->prepare("SELECT COUNT(*) FROM calculations WHERE user_id = ?");
-$countStmt->execute([$userId]);
+$countStmt->execute([$_SESSION['user_id']]);
 $totalRecords = $countStmt->fetchColumn();
 $totalPages = ceil($totalRecords / $limit);
 
-// Получение истории
+// Получение записей с учетом лимита и сдвига
 $stmt = $pdo->prepare("
     SELECT c.*, pt.name as problem_name 
     FROM calculations c 
     JOIN problem_types pt ON c.problem_type_id = pt.id 
-    WHERE c.user_id = :user_id 
+    WHERE c.user_id = ? 
     ORDER BY c.created_at DESC 
-    LIMIT :limit OFFSET :offset
-");
-// Теперь все параметры именованные
-$stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
-$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-$stmt->execute();
-$history = $stmt->fetchAll();
+    LIMIT " . (int)$limit . " OFFSET " . (int)$offset
+);
+$stmt->execute([$_SESSION['user_id']]);
+$history = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<div class="glass-panel" style="padding: 30px; width: 100%; max-width: 1000px; margin: 0 auto;">
-    <h2 style="margin-bottom: 20px;">История расчётов</h2>
-
+<div class="glass-panel" style="padding: 40px; max-width: 1000px; margin: 0 auto;">
+    <h2 class="hero-title" style="font-size: 2rem;">История расчётов</h2>
+    
     <?php if (isset($_GET['msg']) && $_GET['msg'] === 'deleted'): ?>
-        <div class="alert alert-success">Запись удалена из истории.</div>
+        <div class="alert alert-success" style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; color: #6ee7b7; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            Расчет успешно удален из истории.
+        </div>
     <?php endif; ?>
 
     <div style="overflow-x: auto;">
-        <table class="glass-table">
+        <table class="glass-table" style="width: 100%; text-align: left; border-collapse: collapse; margin-bottom: 20px;">
             <thead>
-                <tr>
-                    <th>Дата</th>
-                    <th>Задача</th>
-                    <th>Входные данные</th>
-                    <th>Результат</th>
-                    <th style="text-align: right;">Действия</th>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <th style="padding: 15px; color: var(--text-secondary);">Дата</th>
+                    <th style="padding: 15px; color: var(--text-secondary);">Тип задачи</th>
+                    <th style="padding: 15px; color: var(--text-secondary);">Введенные данные</th>
+                    <th style="padding: 15px; color: var(--text-secondary);">Результат</th>
+                    <th style="padding: 15px; color: var(--text-secondary); text-align: right;">Действия</th>
                 </tr>
             </thead>
             <tbody>
+                <?php foreach($history as $row): ?>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 15px; font-size: 0.9rem; color: var(--text-secondary); white-space: nowrap;">
+                            <?= date('d.m.Y H:i', strtotime($row['created_at'])) ?>
+                        </td>
+                        <td style="padding: 15px; font-weight: 500; color: #fff;">
+                            <?= htmlspecialchars($row['problem_name']) ?>
+                        </td>
+                        <td style="padding: 15px; font-size: 0.9rem; font-family: monospace; color: #cbd5e1;">
+                            <?php 
+                            $inputs = json_decode($row['input_data'], true) ?? [];
+                            foreach ($inputs as $k => $v) { echo "{$k} = {$v}<br>"; }
+                            ?>
+                        </td>
+                        <td style="padding: 15px; font-size: 0.9rem; font-family: monospace; color: #6ee7b7; font-weight: bold;">
+                            <?php 
+                            $results = json_decode($row['result_data'], true) ?? [];
+                            foreach ($results as $k => $v) { echo "{$k} = " . round($v, 4) . "<br>"; }
+                            ?>
+                        </td>
+                        <td style="padding: 15px; text-align: right; white-space: nowrap;">
+                            <a href="/calculator.php?reuse_id=<?= $row['problem_type_id'] ?>&reuse_data=<?= urlencode($row['input_data']) ?>" class="btn" style="background: rgba(250, 204, 21, 0.1); border: 1px solid rgba(250, 204, 21, 0.4); color: #facc15; padding: 6px 12px; font-size: 0.85rem; margin-right: 5px;">Повторить</a>
+                            
+                            <form method="POST" style="display: inline-block;" onsubmit="return confirm('Удалить этот расчет из истории?');">
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="delete_id" value="<?= $row['id'] ?>">
+                                <button type="submit" class="btn" style="background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 6px 12px; font-size: 0.85rem;">Удалить</button>
+                            </form>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
                 <?php if (empty($history)): ?>
-                    <tr><td colspan="5" style="text-align: center;">История пуста. Сделайте свой первый расчёт!</td></tr>
-                <?php else: ?>
-                    <?php foreach ($history as $row): 
-                        $inputs = json_decode($row['input_data'], true) ?? [];
-                        $results = json_decode($row['result_data'], true) ?? [];
-                        
-                        $inStr = [];
-                        foreach($inputs as $k => $v) $inStr[] = "{$k}={$v}";
-                        
-                        $outStr = [];
-                        foreach($results as $k => $v) $outStr[] = "{$k}=" . round($v, 4);
-                    ?>
-                        <tr>
-                            <td style="font-size: 0.9rem; color: var(--text-secondary);"><?= date('d.m.Y H:i', strtotime($row['created_at'])) ?></td>
-                            <td style="font-weight: 500;"><?= htmlspecialchars($row['problem_name']) ?></td>
-                            <td><code style="background: rgba(0,0,0,0.2);"><?= implode(', ', $inStr) ?></code></td>
-                            <td><code style="background: rgba(16, 185, 129, 0.2); color: #6ee7b7;"><?= implode(', ', $outStr) ?></code></td>
-                            <td style="text-align: right;">
-                                <a href="/calculator.php?reuse_id=<?= $row['problem_type_id'] ?>&reuse_data=<?= urlencode($row['input_data']) ?>" class="btn btn-primary" style="padding: 5px 10px; font-size: 0.8rem; margin-right: 5px;">Повторить</a>
-                                
-                                <a href="/history.php?delete=<?= $row['id'] ?>" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.8rem; color: #ef4444; border-color: rgba(239, 68, 68, 0.3);" onclick="return confirm('Удалить этот расчёт?');">Удалить</a>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
+                    <tr><td colspan="5" style="padding: 30px; text-align: center; color: var(--text-secondary);">Ваша история пуста. Выполните свой первый расчет!</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
@@ -99,7 +107,9 @@ require_once __DIR__ . '/includes/header.php';
     <?php if ($totalPages > 1): ?>
         <div class="pagination" style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                <a href="/history.php?page=<?= $i ?>" class="btn <?= $i === $page ? 'btn-primary' : 'btn-secondary' ?>" style="padding: 5px 12px;"><?= $i ?></a>
+                <a href="/history.php?page=<?= $i ?>" class="btn <?= $i === $page ? 'btn-primary' : '' ?>" style="<?= $i !== $page ? 'background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--glass-border);' : '' ?> padding: 8px 15px;">
+                    <?= $i ?>
+                </a>
             <?php endfor; ?>
         </div>
     <?php endif; ?>

@@ -19,6 +19,7 @@ foreach ($problems as $p) {
         'category' => $p['category_name'],
         'description' => $p['description'],
         'base_id' => $p['id'],
+        'schema_type' => $p['schema_type'] ?? null, // Добавлено поле
         'input_fields' => json_decode($p['input_fields'], true)['fields'] ?? [],
         'output_fields' => json_decode($p['output_fields'], true)['fields'] ?? [],
         'prefilled' => []
@@ -28,8 +29,9 @@ foreach ($problems as $p) {
 // 2. Получаем пользовательские задачи (Конструктор)
 $userProblems = [];
 if (isset($_SESSION['user_id'])) {
+    // В SELECT добавлено поле pt.schema_type
     $stmt = $pdo->prepare("
-        SELECT up.*, pt.input_fields, pt.output_fields 
+        SELECT up.*, pt.input_fields, pt.output_fields, pt.schema_type 
         FROM user_problems up 
         JOIN problem_types pt ON up.problem_type_id = pt.id 
         WHERE up.user_id = ? OR up.is_public = TRUE
@@ -44,12 +46,14 @@ if (isset($_SESSION['user_id'])) {
             'category' => 'Пользовательские задачи',
             'description' => $up['description'],
             'base_id' => $up['problem_type_id'],
-            'input_fields' => json_decode($pt_fields ?? $up['input_fields'], true)['fields'] ?? [],
-            'output_fields' => json_decode($pt_fields ?? $up['output_fields'], true)['fields'] ?? [],
+            'schema_type' => $up['schema_type'] ?? null, // Добавлено поле
+            'input_fields' => json_decode($up['input_fields'], true)['fields'] ?? [],
+            'output_fields' => json_decode($up['output_fields'], true)['fields'] ?? [],
             'prefilled' => json_decode($up['input_data'], true) ?? []
         ];
     }
 }
+
 ?>
 
 <div class="glass-panel" style="padding: 40px; max-width: 800px; margin: 0 auto;">
@@ -60,7 +64,10 @@ if (isset($_SESSION['user_id'])) {
         <div class="form-group">
             <label for="problem-select">Тип задачи</label>
             
+            <input type="text" id="problem-search" placeholder="Поиск задачи по названию..." autocomplete="off" style="width: 100%; padding: 12px 16px; margin-bottom: 12px; background: rgba(0,0,0,0.4); color: #fff; border: 1px solid var(--glass-border); border-radius: 8px; font-size: 1rem; outline: none;">
+            
             <select id="problem-select" style="width: 100%; padding: 14px 16px; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid var(--glass-border); border-radius: 8px; font-size: 1rem; cursor: pointer; outline: none;">
+
                 <option value="">-- Выберите задачу --</option>
                 
                 <?php
@@ -131,7 +138,9 @@ if (isset($_SESSION['user_id'])) {
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 
 <script>
-// Передаем структуру из PHP в JS
+// --- ИНИЦИАЛИЗАЦИЯ ДАННЫХ ---
+// Получаем структуру задач (поля ввода/вывода, типы схем, формулы) из PHP в формате JSON.
+// JSON_UNESCAPED_UNICODE используется для корректного отображения кириллицы.
 const problemsData = <?= json_encode($problemsData, JSON_UNESCAPED_UNICODE) ?>;
 
 const select = document.getElementById('problem-select');
@@ -147,22 +156,22 @@ const canvasContainer = document.getElementById('canvas-container');
 const canvas = document.getElementById('schema-canvas');
 const ctx = canvas ? canvas.getContext('2d') : null;
 
-// Функция отрисовки схем на Canvas
-function drawSchema(problemId) {
+// Функция отрисовки схем на Canvas (Без хардкода ID)
+function drawSchema(schemaType) {
     if (!ctx) return;
     
     // Очищаем холст
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Включаем отображение только для поддерживаемых базовых задач
-    if (problemId == 1 || problemId == 3) {
+    // Включаем отображение только если у задачи есть тип схемы
+    if (schemaType === 'kinematics_car' || schemaType === 'dynamics_block') {
         canvasContainer.style.display = 'block';
     } else {
         canvasContainer.style.display = 'none';
         return;
     }
 
-    if (problemId == 1) { 
+    if (schemaType === 'kinematics_car') { 
         // Схема: Равномерное движение
         // Дорога
         ctx.beginPath(); ctx.moveTo(50, 150); ctx.lineTo(550, 150);
@@ -177,7 +186,7 @@ function drawSchema(problemId) {
         ctx.fillStyle = '#ef4444'; ctx.font = 'bold 18px Arial'; ctx.fillText('v', 230, 115);
         ctx.fillStyle = '#475569'; ctx.fillText('s', 320, 175);
     } 
-    else if (problemId == 3) { 
+    else if (schemaType === 'dynamics_block') { 
         // Схема: Второй закон Ньютона
         // Поверхность
         ctx.beginPath(); ctx.moveTo(100, 150); ctx.lineTo(500, 150);
@@ -199,7 +208,10 @@ function drawSchema(problemId) {
 }
 
 
-// 1. Отрисовка полей ввода при выборе задачи
+    // --- ДИНАМИЧЕСКИЙ РЕНДЕРИНГ ФОРМЫ ---
+    // Очищаем контейнер и перебираем массив требуемых полей (input_fields) для выбранной задачи.
+    // Если задача вызвана из "Конструктора", подставляем сохраненные значения (prefilledVal)
+    // и блокируем их от изменения (readonly). Значения экранируются от XSS атак.
 select.addEventListener('change', function() {
     const idKey = this.value;
     resultArea.style.display = 'none';
@@ -215,10 +227,16 @@ select.addEventListener('change', function() {
     
     container.innerHTML = '';
     
-    data.input_fields.forEach(field => {
+        data.input_fields.forEach(field => {
         // Проверяем, есть ли предзаполненное значение из конструктора
-        const prefilledVal = data.prefilled && data.prefilled[field.name] !== undefined ? data.prefilled[field.name] : '';
+        const rawPrefilledVal = data.prefilled && data.prefilled[field.name] !== undefined ? data.prefilled[field.name] : '';
+        
+        // Экранируем значение для защиты от XSS (вдруг злоумышленник сохранил в БД скрипт вместо числа)
+        const escapeHTML = (str) => String(str).replace(/[&<>'"]/g, match => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[match]));
+        const prefilledVal = escapeHTML(rawPrefilledVal);
+        
         const isReadonly = prefilledVal !== '' ? 'readonly' : '';
+        
         const inputStyle = prefilledVal !== '' 
             ? 'background: rgba(250, 204, 21, 0.15); border-color: var(--primary-color); opacity: 0.8;' 
             : 'background: rgba(0,0,0,0.3);';
@@ -261,19 +279,25 @@ calcForm.addEventListener('submit', function(e) {
     const inputs = {};
     formData.forEach((value, key) => { inputs[key] = value; });
     
-    const problemIdKey = select.value;
-    const problemId = problemsData[problemIdKey].base_id; // Для бэкенда нужен базовый числовой ID
-    
-    const btn = calcForm.querySelector('button');
-    const originalBtnText = btn.textContent;
-    btn.textContent = 'Вычисление...';
-    btn.disabled = true;
-    
-    fetch('/ajax_calculate.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ problem_id: problemId, inputs: inputs })
-    })
+        const problemIdKey = select.value;
+        const problemId = problemsData[problemIdKey].base_id; // Базовый ID формулы
+        // Определяем, решаем ли мы сейчас задачу из конструктора
+        const customId = problemIdKey.startsWith('custom_') ? problemIdKey.replace('custom_', '') : null;
+        
+        const btn = calcForm.querySelector('button');
+        const originalBtnText = btn.textContent;
+        btn.textContent = 'Вычисление...';
+        btn.disabled = true;
+        
+    // --- АСИНХРОННЫЙ РАСЧЕТ ---
+    // Формируем полезную нагрузку: базовый ID формулы, флаг кастомной задачи (если есть) 
+    // и введенные пользователем переменные. Отправляем POST-запрос на сервер без перезагрузки страницы.
+        fetch('/ajax_calculate.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ problem_id: problemId, custom_problem_id: customId, inputs: inputs })
+        })
+
     .then(response => response.json())
     .then(data => {
         btn.textContent = originalBtnText;
@@ -307,8 +331,9 @@ calcForm.addEventListener('submit', function(e) {
             if (window.MathJax && MathJax.typesetPromise) {
                 MathJax.typesetPromise([solutionSteps]).catch(err => console.log('MathJax error: ', err.message));
             }
-            // Отрисовка схемы
-            drawSchema(problemId);
+            // Отрисовка схемы на основе schema_type, переданного с бекенда
+            drawSchema(problemsData[problemIdKey].schema_type);
+
         } else {
             successResult.style.display = 'none';
             errorMsg.style.display = 'block';
@@ -359,6 +384,47 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
+// --- ШАГ 2.1: Логика живого поиска по селекту ---
+const searchInput = document.getElementById('problem-search');
+if (searchInput) {
+    searchInput.addEventListener('input', function() {
+        const filter = this.value.toLowerCase();
+        const optgroups = select.querySelectorAll('optgroup');
+        
+        optgroups.forEach(group => {
+            let hasVisibleOptions = false;
+            const options = group.querySelectorAll('option');
+            
+            options.forEach(option => {
+                if (option.value === "") return; // Пропускаем дефолтную опцию
+                
+                const text = option.textContent.toLowerCase();
+                // Если текст опции содержит введенный фильтр - показываем, иначе скрываем
+                if (text.includes(filter)) {
+                    option.style.display = '';
+                    hasVisibleOptions = true;
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+            
+            // Если в категории нет подходящих задач, скрываем всю категорию
+            group.style.display = hasVisibleOptions ? '' : 'none';
+        });
+
+        // Если пользователь ввел текст, и текущая выбранная задача скрылась - сбрасываем выбор
+        if (filter !== '' && select.value !== '') {
+            const selectedOption = select.querySelector(`option[value="${select.value}"]`);
+            if (selectedOption && selectedOption.style.display === 'none') {
+                select.value = '';
+                select.dispatchEvent(new Event('change')); // Принудительно скрываем поля формы
+            }
+        }
+    });
+}
+
+
 </script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

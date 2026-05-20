@@ -1,5 +1,16 @@
 <?php
 class PhysicsCalculator {
+      /**
+     * Основной метод для динамического расчета физических величин.
+     * Анализирует доступные формулы и известные переменные (ввод пользователя + константы БД),
+     * пошагово вычисляя все возможные неизвестные до полного решения задачи.
+     *
+     * @param int $problemId ID базового типа задачи из базы данных.
+     * @param array $inputs Ассоциативный массив введенных пользователем данных (ключ => значение).
+     * @param array|null $problemConfig Конфигурация задачи (формулы, поля вывода, константы).
+     * @return array Ассоциативный массив с результатами: флаг успеха, ошибки, вычисленные значения и пошаговое решение (HTML/LaTeX).
+     * @throws Exception Если недостаточно данных для расчета или обнаружена ошибка в конфигурации.
+     */
     public static function calculate($problemId, $inputs, $problemConfig = null) {
         $result = [
             'success' => false,
@@ -84,9 +95,17 @@ class PhysicsCalculator {
                         : round($calculatedValue, 4);
                         
                     // Шаг 3.2: Динамическая генерация подробных шагов решения
+                    // Заменяем программистские символы на математические для красивого рендера MathJax
+                    $prettyFormula = str_replace(['*', '/'], [' \cdot ', ' \div '], $formulaToUse);
+                    // Делаем красивые индексы, например, v0 превращаем в v_0
+                    $prettyFormula = preg_replace('/([a-zA-Z])(\d+)/', '$1_$2', $prettyFormula);
+                    
+                    $prettySubst = str_replace(['*', '/'], [' \cdot ', ' \div '], $substitutedString);
+                    $prettySubst = preg_replace('/([a-zA-Z])(\d+)/', '$1_$2', $prettySubst);
+                    
                     $result['steps'][] = "<span style='color: var(--primary-color);'><b>► Находим {$target}:</b></span>";
-                    $result['steps'][] = "Формула: \\( {$target} = {$formulaToUse} \\)";
-                    $result['steps'][] = "Подставляем значения: \\( {$target} = {$substitutedString} \\)";
+                    $result['steps'][] = "Формула: \\( {$target} = {$prettyFormula} \\)";
+                    $result['steps'][] = "Подставляем значения: \\( {$target} = {$prettySubst} \\)";
                     $result['steps'][] = "Результат: \\( {$target} = {$displayValue} \\)<br>";
                     
                     $result['results'][$target] = $calculatedValue;
@@ -105,6 +124,16 @@ class PhysicsCalculator {
         }
     }
 
+        /**
+     * Подготавливает математическое выражение к вычислению.
+     * Заменяет буквенные переменные (например, "m", "v0") на их числовые значения.
+     * Сортирует ключи по убыванию длины во избежание конфликтов частичных замен (например, чтобы "v" не заменилось внутри "v0").
+     *
+     * @param string $expr Математическое выражение в строковом виде.
+     * @param array $vars Ассоциативный массив известных переменных со значениями.
+     * @return float Результат вычисления математического выражения.
+     * @throws Exception Если после подстановки остались нераспознанные буквенные символы (неизвестные переменные).
+     */
     private static function evaluateExpression($expr, $vars = []) {
         uksort($vars, function($a, $b) { return strlen($b) - strlen($a); });
         foreach ($vars as $key => $val) {
@@ -118,7 +147,16 @@ class PhysicsCalculator {
         }
         return self::calculateNode($expr);
     }
-
+    
+        /**
+     * Рекурсивный парсер и вычислитель математических строк.
+     * Безопасная альтернатива функции eval(). Учитывает приоритет операций: 
+     * сначала раскрывает скобки, затем выполняет умножение/деление, в конце — сложение/вычитание.
+     *
+     * @param string $expr Строка с математическим выражением (только числа и операторы).
+     * @return float Итоговый вычисленный результат.
+     * @throws Exception При обнаружении попытки деления на ноль.
+     */
     private static function calculateNode($expr) {
         while (preg_match('/\(([^\(\)]+)\)/', $expr, $matches)) {
             $evaluated = self::calculateNode($matches[1]);
