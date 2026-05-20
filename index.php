@@ -10,7 +10,7 @@ require_once __DIR__ . '/includes/header.php';
         
         <?php if ($isLoggedIn): ?>
             <div class="auth-welcome">
-                <p>Вы успешно авторизованы как <strong style="color: #6366f1;"><?= $username ?></strong> (Роль: <?= $role ?>).</p>
+                <p>Вы успешно авторизованы как <strong style="color: #facc15;"><?= $username ?></strong> (Роль: <?= $role ?>).</p>
                 <p style="margin: 15px 0;">Вам полностью доступен весь функционал системы: сохранение истории, использование конструктора задач и персонализированные расчеты.</p>
                 <div class="hero-actions">
                     <a href="/calculator.php" class="btn btn-primary">Перейти к калькулятору</a>

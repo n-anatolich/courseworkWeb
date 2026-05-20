@@ -105,7 +105,7 @@ require_once __DIR__ . '/../includes/header.php';
                         <td style="color: var(--text-secondary);"><?= $p['id'] ?></td>
                         <td><span style="background: rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 4px; font-size: 0.8rem;"><?= htmlspecialchars($p['cat_name']) ?></span></td>
                         <td style="font-weight: 500;"><?= htmlspecialchars($p['name']) ?></td>
-                        <td style="font-family: monospace; color: #a5b4fc;"><?= htmlspecialchars($p['description']) ?></td>
+                        <td style="font-family: monospace; color: #facc15;"><?= htmlspecialchars($p['description']) ?></td>
                         <td style="text-align: right;">
                             <a href="/admin/problems.php?delete=<?= $p['id'] ?>" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.8rem; color: #ef4444; border-color: rgba(239, 68, 68, 0.3);" onclick="return confirm('Точно удалить эту задачу?');">Удалить</a>
                         </td>

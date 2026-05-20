@@ -100,7 +100,7 @@ if (isset($_SESSION['user_id'])) {
             </form>
         </div>
         
-        <div id="result-area" style="display: none; margin-top: 30px; padding: 25px; border-radius: 12px; border-left: 4px solid var(--primary-color); background: rgba(99, 102, 241, 0.05); border-top: 1px solid rgba(255,255,255,0.05); border-right: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <div id="result-area" style="display: none; margin-top: 30px; padding: 25px; border-radius: 12px; border-left: 4px solid var(--primary-color); background: rgba(250, 204, 21, 0.05); border-top: 1px solid rgba(255,255,255,0.05); border-right: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05);">
             <div id="error-msg" class="alert alert-error" style="display: none;"></div>
             
             <div id="success-result" style="display: none;">
@@ -220,8 +220,9 @@ select.addEventListener('change', function() {
         const prefilledVal = data.prefilled && data.prefilled[field.name] !== undefined ? data.prefilled[field.name] : '';
         const isReadonly = prefilledVal !== '' ? 'readonly' : '';
         const inputStyle = prefilledVal !== '' 
-            ? 'background: rgba(99, 102, 241, 0.15); border-color: var(--primary-color); opacity: 0.8;' 
+            ? 'background: rgba(250, 204, 21, 0.15); border-color: var(--primary-color); opacity: 0.8;' 
             : 'background: rgba(0,0,0,0.3);';
+
 
         const div = document.createElement('div');
         div.className = 'form-group';

@@ -37,7 +37,7 @@ $constants = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     ?>
                         <tr class="constant-row">
                             <td style="font-weight: 500;"><?= htmlspecialchars($c['name']) ?></td>
-                            <td><code style="background: rgba(99, 102, 241, 0.2); color: #a5b4fc; padding: 3px 6px; border-radius: 4px; font-size: 0.9rem;"><?= htmlspecialchars($c['symbol']) ?></code></td>
+                            <td><code style="background: rgba(250, 204, 21, 0.15); color: #facc15; padding: 3px 6px; border-radius: 4px; font-size: 0.9rem;"><?= htmlspecialchars($c['symbol']) ?></code></td>
                             <td style="font-family: monospace; color: #6ee7b7; font-size: 1.1rem;"><?= htmlspecialchars($val) ?></td>
                             <td style="color: #94a3b8;"><?= htmlspecialchars($c['unit']) ?></td>
                             <td style="font-size: 0.9rem; color: var(--text-secondary);"><?= htmlspecialchars($c['description']) ?></td>

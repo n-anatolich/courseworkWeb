@@ -38,9 +38,11 @@ require_once __DIR__ . '/../includes/header.php';
     </div>
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px;">
-        <div class="glass-panel" style="padding: 20px; text-align: center; background: rgba(99, 102, 241, 0.1);">
-            <div style="font-size: 2.5rem; font-weight: 700; color: #a5b4fc;"><?= $stats['calculations'] ?></div>
+            <div class="glass-panel" style="padding: 20px; text-align: center; background: rgba(250, 204, 21, 0.1);">
+            <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary-color);"><?= $stats['calculations'] ?></div>
             <div style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase;">Всего расчётов</div>
+        </div>
+
         </div>
         <div class="glass-panel" style="padding: 20px; text-align: center;">
             <div style="font-size: 2.5rem; font-weight: 700; color: #fff;"><?= $stats['users'] ?></div>

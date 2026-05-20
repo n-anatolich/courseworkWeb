@@ -53,7 +53,7 @@ require_once __DIR__ . '/../includes/header.php';
                         <td style="font-weight: 500;"><?= htmlspecialchars($u['username']) ?></td>
                         <td><?= htmlspecialchars($u['email']) ?></td>
                         <td>
-                            <span style="padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; <?= $u['role'] === 'admin' ? 'background: rgba(99, 102, 241, 0.2); color: #a5b4fc;' : 'background: rgba(255,255,255,0.1); color: #cbd5e1;' ?>">
+                            <span style="padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; <?= $u['role'] === 'admin' ? 'background: rgba(250, 204, 21, 0.15); color: #facc15;' : 'background: rgba(255,255,255,0.1); color: #cbd5e1;' ?>">
                                 <?= htmlspecialchars(strtoupper($u['role'])) ?>
                             </span>
                         </td>

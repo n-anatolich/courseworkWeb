@@ -1,25 +1,25 @@
-/* Premium Glassmorphism Theme - CSS */
+/* AMOLED Black & Yellow Premium Theme - CSS */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-    --primary-color: #6366f1;
-    --primary-hover: #4f46e5;
-    --secondary-color: #475569;
-    --bg-gradient-start: #0f172a;
-    --bg-gradient-end: #1e293b;
-    --glass-bg: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
+    --primary-color: #facc15; /* Яркий желтый акцент */
+    --primary-hover: #eab308; /* Более темный желтый при наведении */
+    --secondary-color: #262626; /* Темно-серый */
+    --bg-color: #000000; /* Истинный AMOLED черный */
+    --panel-bg: #0a0a0a; /* Слегка осветленный черный для карточек/панелей */
+    --glass-bg: rgba(10, 10, 10, 0.8); /* Темно-серая прозрачность */
+    --glass-border: rgba(255, 255, 255, 0.08); /* Тонкие полупрозрачные рамки */
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.9);
+    --text-primary: #ffffff; /* Белый текст */
+    --text-secondary: #a3a3a3; /* Серый текст для второстепенной информации */
+    --accent-glow: rgba(250, 204, 21, 0.25); /* Желтое свечение */
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
     font-family: 'Inter', sans-serif;
-    background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
-    background-attachment: fixed;
+    background-color: var(--bg-color); /* Полностью черный фон без градиентов */
     color: var(--text-primary);
     display: flex;
     flex-direction: column;
@@ -32,8 +32,8 @@ body {
 /* Utilities */
 .glass-panel {
     background: var(--glass-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
     border-radius: 16px;
     box-shadow: var(--glass-shadow);
@@ -53,12 +53,13 @@ body {
 
 .btn-primary {
     background-color: var(--primary-color);
-    color: white;
-    box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39);
+    color: #000000 !important; /* Черный текст на желтом фоне для читаемости */
+    box-shadow: 0 4px 14px 0 var(--accent-glow);
 }
 .btn-primary:hover {
     background-color: var(--primary-hover);
     transform: translateY(-2px);
+    box-shadow: 0 6px 20px 0 rgba(250, 204, 21, 0.4);
 }
 
 .btn-secondary {
@@ -67,39 +68,55 @@ body {
     border: 1px solid var(--glass-border);
 }
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(250, 204, 21, 0.05);
+    color: var(--primary-color);
+    border-color: var(--primary-color);
 }
 
 .btn-block { display: block; width: 100%; }
 
 /* Header */
 .main-header {
-    background: rgba(15, 23, 42, 0.7);
+    background: rgba(0, 0, 0, 0.85);
     border-bottom: 1px solid var(--glass-border);
     border-radius: 0;
     padding: 15px 0;
     position: sticky;
     top: 0;
     z-index: 100;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .header-container { display: flex; justify-content: space-between; align-items: center; }
 
 .logo { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; }
-.logo a { color: #fff; text-decoration: none; display: flex; align-items: center; gap: 8px;}
+.logo a { color: var(--primary-color); text-decoration: none; display: flex; align-items: center; gap: 8px; transition: all 0.3s; }
+.logo a:hover { color: var(--primary-hover); text-shadow: 0 0 10px var(--accent-glow); }
 
 .main-nav ul { list-style: none; display: flex; gap: 24px; align-items: center; }
 .main-nav a { color: var(--text-secondary); text-decoration: none; font-weight: 500; transition: color 0.2s; }
-.main-nav a:hover { color: #fff; }
+.main-nav a:hover { color: var(--primary-color); }
 
-.admin-link { color: #f59e0b !important; }
-.user-greeting { color: #cbd5e1; font-size: 0.9rem; margin-right: 10px;}
-.btn-login { color: #fff !important; }
-.btn-register, .btn-logout { 
-    background: var(--primary-color); padding: 6px 16px; border-radius: 6px; color: #fff !important; margin-left: 5px;
+.admin-link { color: #f87171 !important; } /* Красноватый оттенок для отличия от обычной желтой темы */
+.admin-link:hover { color: #ef4444 !important; }
+
+/* Подсветка имени пользователя акцентным цветом */
+.user-greeting strong {
+    color: var(--primary-color);
 }
+.user-greeting { color: #d4d4d8; font-size: 0.9rem; margin-right: 10px;}
+.btn-login { color: #fff !important; }
+.btn-login:hover { color: var(--primary-color) !important; }
+
+.btn-register, .btn-logout { 
+    padding: 6px 16px; border-radius: 6px; margin-left: 5px;
+}
+.btn-register { background: var(--primary-color); color: #000000 !important; font-weight: 600; }
+.btn-register:hover { background: var(--primary-hover); transform: translateY(-1px); }
+
 .btn-logout { background: transparent; border: 1px solid #ef4444; color: #ef4444 !important; }
-.btn-logout:hover { background: #ef4444; color: #fff !important; }
+.btn-logout:hover { background: #ef4444; color: #000000 !important; }
 
 /* Content */
 .content { flex: 1; padding: 50px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -111,7 +128,15 @@ body {
     max-width: 800px;
     animation: fadeIn 0.8s ease-out;
 }
-.hero-title { font-size: 2.5rem; margin-bottom: 15px; font-weight: 700; background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;}
+.hero-title { 
+    font-size: 2.5rem; 
+    margin-bottom: 15px; 
+    font-weight: 700; 
+    background: linear-gradient(to right, #ffffff, var(--primary-color)); 
+    -webkit-background-clip: text; 
+    background-clip: text; 
+    -webkit-text-fill-color: transparent;
+}
 .hero-subtitle { font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 30px; }
 .hero-actions { display: flex; justify-content: center; gap: 15px; margin-top: 30px;}
 
@@ -121,29 +146,35 @@ body {
     width: 100%; max-width: 420px;
     padding: 40px;
     animation: slideUp 0.5s ease-out;
+    background: var(--panel-bg);
+    border: 1px solid var(--glass-border);
 }
-.auth-title { font-size: 1.8rem; margin-bottom: 10px; text-align: center; color: #fff; }
+.auth-title { font-size: 1.8rem; margin-bottom: 10px; text-align: center; color: var(--primary-color); }
 .auth-subtitle { color: var(--text-secondary); text-align: center; margin-bottom: 30px; font-size: 0.95rem; }
 
 .form-group { margin-bottom: 20px; text-align: left; }
-.form-group label { display: block; margin-bottom: 8px; font-size: 0.9rem; font-weight: 500; color: #cbd5e1; }
+.form-group label { display: block; margin-bottom: 8px; font-size: 0.9rem; font-weight: 500; color: #d4d4d8; }
 .form-modern input {
     width: 100%;
     padding: 12px 16px;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid var(--glass-border);
+    background: #000000;
+    border: 1px solid #3f3f46;
     border-radius: 8px;
-    color: #fff;
+    color: #ffffff;
     font-family: inherit;
     font-size: 1rem;
     transition: all 0.3s ease;
 }
-.form-modern input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); }
-.form-modern input::placeholder { color: #475569; }
+.form-modern input:focus { 
+    outline: none; 
+    border-color: var(--primary-color); 
+    box-shadow: 0 0 0 2px var(--accent-glow); 
+}
+.form-modern input::placeholder { color: #52525b; }
 
 .auth-footer { margin-top: 25px; text-align: center; font-size: 0.9rem; color: var(--text-secondary); }
 .auth-footer a { color: var(--primary-color); text-decoration: none; font-weight: 500; }
-.auth-footer a:hover { text-decoration: underline; }
+.auth-footer a:hover { text-decoration: underline; color: var(--primary-hover); }
 
 /* Alerts */
 .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 25px; font-size: 0.95rem; text-align: left; }
@@ -154,8 +185,10 @@ body {
 .main-footer {
     padding: 20px 0; text-align: center; font-size: 0.9rem;
     border-top: 1px solid var(--glass-border);
-    background: rgba(15, 23, 42, 0.5);
+    background: #000000;
+    color: var(--text-secondary);
 }
+.main-footer strong { color: var(--primary-color); }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -176,20 +209,27 @@ body {
 
 .glass-table th {
     font-weight: 600;
-    color: #cbd5e1;
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.glass-table tr:hover td {
+    color: var(--primary-color);
     background: rgba(255, 255, 255, 0.03);
 }
 
+.glass-table tr:hover td {
+    background: rgba(250, 204, 21, 0.05); /* Желтая подсветка строки при наведении */
+}
+
 .glass-table code {
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(250, 204, 21, 0.15);
     padding: 2px 6px;
     border-radius: 4px;
     font-family: monospace;
-    color: #a5b4fc;
+    color: var(--primary-color); /* Желтый код */
+}
+
+/* Утилита для жесткой блокировки скролла на мобильных устройствах */
+html.no-scroll, body.no-scroll {
+    overflow: hidden !important;
+    height: 100vh !important;
+    touch-action: none; /* Запрещает жесты прокрутки */
 }
 
 /* --- СТИЛИ БУРГЕР-МЕНЮ --- */
@@ -209,12 +249,12 @@ body {
 .burger-menu span {
     width: 100%;
     height: 3px;
-    background-color: #fff;
+    background-color: var(--primary-color); /* Полоски бургера теперь желтые */
     border-radius: 3px;
     transition: all 0.3s ease;
 }
 
-/* Адаптивность для мобильных устройств (Бургер-меню в правом верхнем углу) */
+/* Адаптивность для мобильных устройств (Полноэкранное меню) */
 @media (max-width: 768px) {
     html, body {
         overflow-x: hidden;
@@ -223,38 +263,48 @@ body {
 
     .header-container {
         display: flex;
-        flex-direction: row; /* Логотип и бургер встают в одну линию */
-        justify-content: space-between; /* Логотип уходит влево, бургер — вправо */
+        flex-direction: row;
+        justify-content: space-between;
         align-items: center;
         padding: 12px 20px !important;
         position: relative;
     }
 
-    .burger-menu {
-        display: flex; /* Показываем кнопку бургера */
-        position: relative;
-        margin-left: auto; /* Гарантирует смещение в самый правый край */
-    }
-
     .user-greeting {
-        display: none; /* Полностью убираем приветствие на мобильных, чтобы не ломать строку */
+        display: none;
     }
 
     .main-nav {
-        width: 100%; /* Контейнер навигации занимает всю ширину под логотипом */
-        order: 3; /* Смещает выпадающий список ниже линии логотипа и бургера */
+        order: 3;
     }
 
+    /* Кнопка бургера должна быть поверх открытого меню */
+    .burger-menu {
+        display: flex;
+        position: relative;
+        margin-left: auto;
+        z-index: 1000;
+    }
+
+    /* Полноэкранный оверлей */
     .main-nav ul {
         display: none;
         flex-direction: column;
-        width: 100%;
-        background: rgba(15, 23, 42, 0.98);
-        padding: 10px 0;
-        border-radius: 8px;
-        margin-top: 12px;
-        border: 1px solid var(--glass-border);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        justify-content: center; /* Центрируем пункты меню на экране */
+        align-items: center;
+        position: fixed; /* Отвязываем от контента, фиксируем на экране */
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh; /* Динамическая высота для мобильных браузеров */
+        background: #000000; /* Чистый AMOLED черный */
+        z-index: 999; /* Ниже кнопки бургера, но выше всего остального сайта */
+        margin: 0;
+        padding: 20px;
+        border-radius: 0;
+        border: none;
+        overscroll-behavior: none;
     }
 
     .main-nav ul.active {
@@ -262,8 +312,9 @@ body {
     }
 
     .main-nav li {
+        width: 100%;
         margin: 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        border-bottom: 1px solid var(--glass-border);
     }
 
     .main-nav li:last-child {
@@ -272,13 +323,17 @@ body {
 
     .main-nav a {
         display: block;
-        padding: 12px 20px;
-        font-size: 1rem;
-        text-align: left; /* Выравнивание ссылок по левому краю для аккуратности */
+        padding: 20px;
+        font-size: 1.25rem;
+        text-align: center;
+        color: var(--text-primary);
     }
-}
-
     
+    .main-nav a:hover {
+        color: var(--primary-color);
+        background: rgba(250, 204, 21, 0.05); /* Подсветка ссылки желтым при нажатии */
+    }
+
     /* Анимация превращения бургера в крестик (X) */
     .burger-menu.open span:nth-child(1) {
         transform: translateY(9.5px) rotate(45deg);
@@ -289,4 +344,25 @@ body {
     .burger-menu.open span:nth-child(3) {
         transform: translateY(-9.5px) rotate(-45deg);
     }
+    
+        /* --- Вариант с сохранением компактной карточки --- */
+    
+    /* 1. Делаем внешние отступы контейнера минимальными (по 2% с каждой стороны) */
+    .container {
+        width: 96% !important;
+    }
+
+    /* 2. Ужимаем внутренние поля карточки */
+    .content > .glass-panel {
+        width: 100% !important;
+        padding: 20px 16px !important; /* Минимальные комфортные отступы для пальцев */
+        border-radius: 12px !important; /* Оставляем легкое элегантное скругление */
+    }
+
+    /* Поля ввода в один столбец */
+    #input-fields-container, #dynamic-inputs {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+
 }
