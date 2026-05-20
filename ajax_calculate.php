@@ -23,8 +23,33 @@ foreach ($inputs as $key => $value) {
     }
 }
 
-// Выполняем расчёт
-$result = PhysicsCalculator::calculate($problemId, $cleanInputs);
+// Получаем конфигурацию задачи из БД (формулы и настройки полей)
+$stmt = $pdo->prepare("SELECT formula_text, formula_expression, output_fields FROM problem_types WHERE id = ?");
+$stmt->execute([$problemId]);
+$problemConfig = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if ($problemConfig) {
+    // Декодируем JSON для удобной работы в калькуляторе
+    $problemConfig['formula_expression'] = json_decode($problemConfig['formula_expression'], true);
+    $problemConfig['output_fields'] = json_decode($problemConfig['output_fields'], true)['fields'] ?? [];
+} else {
+    echo json_encode(['success' => false, 'error' => 'Задача не найдена в базе данных']);
+    exit;
+}
+
+// Подтягиваем все физические константы из базы данных
+$stmtConst = $pdo->query("SELECT symbol, value FROM constants");
+$dbConstants = [];
+while ($row = $stmtConst->fetch(PDO::FETCH_ASSOC)) {
+    // Сохраняем символ (например, 'g') как ключ, а значение как число
+    $dbConstants[$row['symbol']] = (float)$row['value'];
+}
+$problemConfig['constants'] = $dbConstants;
+
+
+// Выполняем расчёт, передавая конфигурацию третьим параметром
+$result = PhysicsCalculator::calculate($problemId, $cleanInputs, $problemConfig);
+
 
 // Если расчёт успешен и пользователь авторизован - сохраняем в историю
 if ($result['success'] && isset($_SESSION['user_id'])) {
